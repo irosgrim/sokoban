@@ -1,53 +1,73 @@
 const b = [
-    ["_","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x"],
-    ["x","o","_","_","o","_","_","x","o","_","_","o","_","_","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","p","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","_","_","_","o","x","_","_","_","_","_","o","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","x","x","x","x","_","_","_","x","x","x","x","_","_","_","x"],
-    ["x","o","_","_","o","_","_","x","o","_","_","o","_","_","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","_","_","_","_","_","o","x","_","_","_","_","_","o","x","x"],
-    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
-    ["x","x","x","x","x","_","_","_","x","x","x","x","_","_","_","x"],
-    ["_","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x"],
+    [0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,1,0,1,0,2,0,0,1,1],
+    [1,0,2,0,2,0,0,1,0,1,0,0,0,0,1,1],
+    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1],
+    [1,0,0,4,0,0,0,1,0,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,2,1,0,1,0,0,0,2,0,1],
+    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1],
+    [0,1,0,0,1,0,1,0,0,1,1,1,0,0,0,1],
+    [0,1,0,0,2,0,1,0,0,1,0,2,0,0,1,1],
+    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,1],
+    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,1],
+    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,3,1],
+    [1,0,0,0,0,0,2,1,0,1,0,0,0,2,0,1],
+    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1],
+    [1,1,1,1,1,0,0,3,0,1,1,1,0,0,0,1],
+    [0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
 ];
 
 const blockType = {
-    x: {
+    0: null,
+    1: {
         fillStyle: "blue",
         strokeStyle: "gray",
         lineWidth: 6,
         type: "obstacle",
     },
-    _: null,
-    o: {
+    2: {
         fillStyle: "yellow",
         strokeStyle: "brown",
         lineWidth: 6,
-        type: "box",
+        type: "crate",
     },
-    p: {
-        fillStyle: "white",
-        strokeStyle: "black",
-        lineWidth: 6,
-        type: "player",
-    },
-    t: {
+    3: {
         fillStyle: "green",
         strokeStyle: "green",
         lineWidth: 6,
         type: "target",
+    },
+    4: {
+        fillStyle: "white",
+        strokeStyle: "black",
+        lineWidth: 6,
+        type: "player",
     },
 
 }
 
 const blox = [];
 
+class EventManager {
+    constructor() {
+        this.listeners = {};
+    }
+
+    on(event, callback) {
+        if (!this.listeners[event]) {
+            this.listeners[event] = [];
+        }
+        this.listeners[event].push(callback);
+    }
+
+    emit(event, data) {
+        if (this.listeners[event]) {
+            for (let callback of this.listeners[event]) {
+                callback(data);
+            }
+        }
+    }
+}
 
 class Game {
     constructor(blocks, rows, columns, blockSize, canvasElement, ctx) {
@@ -55,62 +75,90 @@ class Game {
         this.rows = rows;
         this.columns = columns;
         this.blocks = [];
-        this.makeBlocks(blocks);
+        this.playerBlock = null;
         this.direction = [0, 0];
         this.input = new InputHandler(this, ctx);
         this.canvas = canvasElement;
         this.board = new Board(this, columns * blockSize, rows * blockSize);
-        // this.timeToNextStep = 0;
-        // this.stepInterval = 150;
-        // this.lastTime = 0;
+        this.events = new EventManager();
+        this.makeBlocks(blocks);
     }
     update() {
-        // this.player.update();
         for (const block of this.blocks) {
             block.update();
         }
+        this.playerBlock.update(); 
     }
     draw(context) {
         for (const block of this.blocks) {
             block.draw(context)
         }
+        this.playerBlock.draw(context);
         this.board.draw(context);
     }
     makeBlocks(blocks) {
         for (let y = 0; y < blocks.length; y++) {
             for (let x = 0; x < blocks[y].length; x++) {
                 if (blockType[blocks[y][x]]) {
-                    this.blocks.push(new Block(this, {
+                    let blockConfig = {
                         x: x * this.blockSize,
                         y: y * this.blockSize,
                         width: this.blockSize,
                         height: this.blockSize,
                         props: blockType[blocks[y][x]],
-                    }))
+                    };
+                    
+                    if (blockConfig.props.type === "player") {
+                        this.playerBlock = new MovableBlock(this, this.events, blockConfig);
+                    } else if (blockConfig.props.type === "crate") {
+                        this.blocks.push(new MovableBlock(this, this.events, blockConfig));
+                    } else {
+                        this.blocks.push(new Block(this, this.events, blockConfig));
+                    }
                 }
             }
         }
-
     }
     reset() {}
 };
 
 class Block {
-    constructor(game, block) {
+    constructor(game, events, block) {
         this.game = game;
+        this.events = events;
         this.x = block.x;
         this.y = block.y;
         this.height = block.height;
         this.width = block.width;
         this.props = block.props;
+        this.events.on("playerMoved", this.move);
+    }
+    move (data) {
+        console.log("event of movement", data)
     }
     update() {
+        const hit = this.hittingStuff();
         if (this.props.type === "player") {
             const [x, y] = this.game.direction;
-            this.x += (x * this.width);
-            this.y += (y * this.height);
+            let canMove = true; 
+
+            if (hit > 0) {
+                const block = this.game.blocks[hit];
+                if (block.props.type === "crate") {
+                    canMove = this.pushCrateIfPossible(block);
+                }
+                if (block.props.type === "obstacle") {
+                    canMove = false;
+                }
+            }
+
+            if (canMove) {
+                this.x += (x * this.width);
+                this.y += (y * this.height);
+            }
         }
     }
+
     draw(context) {
         context.fillStyle = this.props.fillStyle;
         context.strokeStyle = this.props.strokeStyle;
@@ -118,7 +166,63 @@ class Block {
         context.fillRect(this.x+6, this.y+6, this.height-12, this.width-12);
         context.strokeRect(this.x+3, this.y+3, this.height - 6, this.width - 6);
     }
-    move() {}
+    hittingStuff() {
+        const [dx, dy] = this.game.direction;
+        this.game.events.emit('block:checkCollision', { block: this });
+        let block = null;
+        for (let i = 0; i < this.game.blocks.length; i++) {
+            block = this.game.blocks[i];
+            if (block.props.type === "player") {
+                continue;
+            }
+
+            const isHittingHorizontally = (dx > 0 && block.x === this.x + this.width) || 
+                                        (dx < 0 && block.x + block.width === this.x);
+            
+            const isHittingVertically = (dy > 0 && block.y === this.y + this.height) ||
+                                        (dy < 0 && block.y + block.height === this.y);
+            
+            if ((dx !== 0 && isHittingHorizontally && block.y === this.y) || 
+                (dy !== 0 && isHittingVertically && block.x === this.x)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    pushCrateIfPossible(block) {
+        const [dx, dy] = this.game.direction;
+        const newCrateX = block.x + dx * block.width;
+        const newCrateY = block.y + dy * block.height;
+
+        if (!this.wouldHit(block, newCrateX, newCrateY)) {
+            block.x = newCrateX;
+            block.y = newCrateY;
+            return true;
+        }
+
+        return false;
+    }
+
+    wouldHit(block, newX, newY) {
+        for (let i = 0; i < this.game.blocks.length; i++) {
+            const otherBlock = this.game.blocks[i];
+            if (otherBlock === block || otherBlock.props.type === "player") {
+                continue;
+            }
+
+            if (otherBlock.x === newX && otherBlock.y === newY) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+class MovableBlock extends Block {
+    constructor (game, events, block) {
+        super (game, events, block)
+    }
 }
 
 class Board {
@@ -156,9 +260,6 @@ const loadGame = () => {
     const columns = 16;
     
     const canvas = document.getElementById("canvas");
-    // canvas.style.width = `${blockSize*columns}px`;
-    // canvas.style.height = `${blockSize*rows}px`;
-    
     const ctx = canvas.getContext("2d");
     const scale = window.devicePixelRatio;
 
@@ -167,22 +268,6 @@ const loadGame = () => {
     const game = new Game(b, rows, columns, blockSize, canvas, ctx);
     
     game.draw(ctx);
-
-    // const gameLoop = (timestamp = 0) => {
-    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //     let deltaTime = timestamp - game.lastTime;
-    //     game.lastTime = timestamp;
-    //     game.timeToNextStep += deltaTime;
-    //     game.draw(ctx);
-       
-    //     // if(game.timeToNextStep > game.stepInterval) {
-    //     //     game.timeToNextStep = 0;
-    //     // }
-    //     game.update();
-    //     window.requestAnimationFrame(gameLoop);
-    // }
-
-    // gameLoop();
 }
 
 class InputHandler {
@@ -205,16 +290,11 @@ class InputHandler {
         if (directions[key]) {
             const [x, y] = this.game.direction;
             let allowedKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-            // if (x) {
-            //     allowedKeys = allowedKeys.filter(x => !["ArrowLeft", "ArrowRight"].includes(x))
-            // }
-            // if (y) {
-            //     allowedKeys = allowedKeys.filter(x => !["ArrowUp", "ArrowDown"].includes(x))
-            // }
             if (allowedKeys.includes(key)) {
                 this.game.direction = directions[key];
                 this.ctx.clearRect(0, 0, canvas.width, canvas.height);
                 this.game.update();
+                this.game.events.emit("playerMoved", this.game.player);
                 this.game.draw(this.ctx);
             }
         }

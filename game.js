@@ -1,19 +1,19 @@
 const b = [
-    [0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,1,0,1,0,2,0,0,1,1],
-    [1,0,2,0,2,0,0,1,0,1,0,0,0,0,1,1],
-    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1],
-    [1,0,0,4,0,0,0,1,0,1,0,0,0,0,0,1],
-    [1,0,0,0,0,0,2,1,0,1,0,0,0,2,0,1],
-    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1],
-    [0,1,0,0,1,0,1,0,0,1,1,1,0,0,0,1],
-    [0,1,0,0,2,0,1,0,0,1,0,2,0,0,1,1],
-    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,1],
-    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,1],
-    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,3,1],
-    [1,0,0,0,0,0,2,1,0,1,0,0,0,2,0,1],
-    [1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1],
-    [1,1,1,1,1,0,0,3,0,1,1,1,0,0,0,1],
+    [0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0],
+    [1,0,0,0,0,0,0,1,1,0,0,2,0,3,1,0],
+    [1,0,2,0,2,0,0,3,0,0,0,0,0,0,1,0],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [1,0,0,4,0,0,0,0,0,0,0,0,3,0,3,1],
+    [1,0,0,3,0,0,2,0,0,3,0,0,0,2,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+    [0,1,0,0,1,0,1,0,0,0,1,1,0,0,1,0],
+    [0,1,0,0,2,0,1,0,0,0,1,0,2,0,1,0],
+    [1,0,0,0,0,3,1,0,2,0,1,0,2,0,1,0],
+    [1,0,3,0,0,0,1,0,0,0,1,0,0,0,1,0],
+    [1,0,0,0,0,0,0,1,1,1,0,0,0,0,1,0],
+    [1,0,0,1,0,0,2,1,3,0,0,0,0,2,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,3,1,1,1,0,0,0,0,0,1],
     [0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
 ];
 
@@ -70,108 +70,140 @@ class EventManager {
 }
 
 class Game {
-    constructor(blocks, rows, columns, blockSize, canvasElement, ctx) {
+    constructor(blocks, rows, columns, blockSize, canvasElement, ctx, eventManager) {
+        this.ctx = ctx;
+        this.targetsLeft = 0;
         this.blockSize = blockSize
         this.rows = rows;
         this.columns = columns;
         this.blocks = [];
-        this.playerBlock = null;
-        this.direction = [0, 0];
-        this.input = new InputHandler(this, ctx);
+        this.player = null;
         this.canvas = canvasElement;
         this.board = new Board(this, columns * blockSize, rows * blockSize);
-        this.events = new EventManager();
+        this.eventManager = eventManager;
         this.makeBlocks(blocks);
+        this.eventManager.on("direction:change", this.handleDirectionChange.bind(this));
+        this.eventManager.on("block:move", this.handleBlockMoved.bind(this));
+        this.txt = document.getElementById("targets");
     }
-    update() {
-        for (const block of this.blocks) {
-            block.update();
+
+    handleBlockMoved(data) {
+        const {block} = data;
+        let wasOnTarget = block.isOnTarget || false;
+        for (const bl of this.blocks) {
+            if (bl.props.type === "target") {
+                if (bl.x === block.x && bl.y === block.y) {
+
+                    block.props.fillStyle = "red";
+                    block.props.strokeStyle = "red";
+                    block.isOnTarget = true;
+
+                    if (!wasOnTarget) {
+                        this.targetsLeft--;
+                        this.eventManager.emit("targets", this.targetsLeft);
+                    }
+                    return;
+                }
+            }
         }
-        this.playerBlock.update(); 
+
+        if (wasOnTarget) {
+            block.props.fillStyle = blockType[2].fillStyle;
+            block.props.strokeStyle = blockType[2].strokeStyle;
+            block.isOnTarget = false;
+
+            this.targetsLeft++;
+            this.eventManager.emit("targets", this.targetsLeft);
+        }
     }
+    handleDirectionChange(direction) {
+        this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.movePlayer(direction);
+        this.draw(this.ctx);
+    }
+    
     draw(context) {
         for (const block of this.blocks) {
             block.draw(context)
         }
-        this.playerBlock.draw(context);
+        this.player.draw(context);
         this.board.draw(context);
     }
+
     makeBlocks(blocks) {
         for (let y = 0; y < blocks.length; y++) {
             for (let x = 0; x < blocks[y].length; x++) {
                 if (blockType[blocks[y][x]]) {
+                    if (blockType[blocks[y][x]].type === "target") {
+                        this.targetsLeft += 1;
+                        this.eventManager.emit("targets", this.targetsLeft);
+                    }
                     let blockConfig = {
                         x: x * this.blockSize,
                         y: y * this.blockSize,
                         width: this.blockSize,
                         height: this.blockSize,
-                        props: blockType[blocks[y][x]],
+                        props: {...blockType[blocks[y][x]]},
                     };
                     
                     if (blockConfig.props.type === "player") {
-                        this.playerBlock = new MovableBlock(this, this.events, blockConfig);
+                        this.player = new MovableBlock(this.eventManager, blockConfig);
                     } else if (blockConfig.props.type === "crate") {
-                        this.blocks.push(new MovableBlock(this, this.events, blockConfig));
+                        this.blocks.push(new MovableBlock(this.eventManager, blockConfig));
                     } else {
-                        this.blocks.push(new Block(this, this.events, blockConfig));
+                        this.blocks.push(new Block(this.eventManager, blockConfig));
                     }
                 }
             }
         }
     }
-    reset() {}
+
+    movePlayer(direction) {
+        this.eventManager.emit("player:move", { direction, blocks: this.blocks });
+    }
 };
 
 class Block {
-    constructor(game, events, block) {
-        this.game = game;
-        this.events = events;
+    constructor(eventManager, block) {
+        this.eventManager = eventManager;
         this.x = block.x;
         this.y = block.y;
         this.height = block.height;
         this.width = block.width;
         this.props = block.props;
-        this.events.on("playerMoved", this.move);
-    }
-    move (data) {
-        console.log("event of movement", data)
-    }
-    update() {
-        const hit = this.hittingStuff();
-        if (this.props.type === "player") {
-            const [x, y] = this.game.direction;
-            let canMove = true; 
-
-            if (hit > 0) {
-                const block = this.game.blocks[hit];
-                if (block.props.type === "crate") {
-                    canMove = this.pushCrateIfPossible(block);
-                }
-                if (block.props.type === "obstacle") {
-                    canMove = false;
-                }
-            }
-
-            if (canMove) {
-                this.x += (x * this.width);
-                this.y += (y * this.height);
-            }
-        }
+        this.isOnTarget = false;
     }
 
     draw(context) {
         context.fillStyle = this.props.fillStyle;
         context.strokeStyle = this.props.strokeStyle;
         context.lineWidth = 6;
-        context.fillRect(this.x+6, this.y+6, this.height-12, this.width-12);
-        context.strokeRect(this.x+3, this.y+3, this.height - 6, this.width - 6);
+        if (this.props.type === "target") {
+            context.beginPath();
+            context.arc(this.x+this.width/2, this.y+this.height/2, this.height/2 - 6, 0, Math.PI * 2, true);
+            context.fill();
+            context.lineWidth = 5;
+            context.strokeStyle = '#003300';
+            context.stroke();
+        } else {
+            context.fillRect(this.x+6, this.y+6, this.height-12, this.width-12);
+            context.strokeRect(this.x+3, this.y+3, this.height - 6, this.width - 6);
+        }
     }
-    hittingStuff() {
-        const [dx, dy] = this.game.direction;
-        this.game.events.emit('block:checkCollision', { block: this });
+}
+
+class MovableBlock extends Block {
+    constructor (eventManager, block) {
+        super (eventManager, block)
+        this.eventManager = eventManager;
+        this.eventManager.on("player:move", this.move.bind(this));
+    };
+
+    hittingStuff(direction, blocks) {
+        const [dx, dy] = direction;
         let block = null;
-        for (let i = 0; i < this.game.blocks.length; i++) {
-            block = this.game.blocks[i];
+        for (let i = 0; i < blocks.length; i++) {
+            block = blocks[i];
             if (block.props.type === "player") {
                 continue;
             }
@@ -190,39 +222,75 @@ class Block {
         return -1;
     }
 
-    pushCrateIfPossible(block) {
-        const [dx, dy] = this.game.direction;
-        const newCrateX = block.x + dx * block.width;
-        const newCrateY = block.y + dy * block.height;
+    pushCrateIfPossible(block, data) {
+        const [dx, dy] = data.direction;
+        const newCrateX = block.x + (dx * block.width);
+        const newCrateY = block.y + (dy * block.height);
 
-        if (!this.wouldHit(block, newCrateX, newCrateY)) {
+        if (!this.wouldHit(block, data.blocks, newCrateX, newCrateY)) {
             block.x = newCrateX;
             block.y = newCrateY;
+
+            this.eventManager.emit("block:move", {block});
+
+            // if (this.isOnTarget(block, data.blocks)) {
+            //     block.props.fillStyle = "red"; // Change to the color you want when it's on a target
+            // }
             return true;
         }
 
         return false;
     }
 
-    wouldHit(block, newX, newY) {
-        for (let i = 0; i < this.game.blocks.length; i++) {
-            const otherBlock = this.game.blocks[i];
-            if (otherBlock === block || otherBlock.props.type === "player") {
-                continue;
-            }
-
-            if (otherBlock.x === newX && otherBlock.y === newY) {
+    isOnTarget(block, blocks) {
+        for (let i = 0; i < blocks.length; i++) {
+            const otherBlock = blocks[i];
+            if (otherBlock.props.type === "target" && otherBlock.x === block.x && otherBlock.y === block.y) {
                 return true;
             }
         }
         return false;
     }
-}
 
-class MovableBlock extends Block {
-    constructor (game, events, block) {
-        super (game, events, block)
+    wouldHit(block, blocks, newX, newY) {
+        for (let i = 0; i < blocks.length; i++) {
+            const otherBlock = blocks[i];
+            if (otherBlock === block || otherBlock.props.type === "player") {
+                continue;
+            }
+
+            if (otherBlock.x === newX && otherBlock.y === newY && otherBlock.props.type !== "target") {
+                return true;
+            }
+        }
+
+        return false;
     }
+
+    move(data) {
+        const hit = this.hittingStuff(data.direction, data.blocks);
+        if (this.props.type === "player") {
+            const [x, y] = data.direction;
+            let canMove = true; 
+
+            if (hit > 0) {
+                const block = data.blocks[hit];
+                if (block.props.type === "crate") {
+                    canMove = this.pushCrateIfPossible(block, data);
+                }
+                if (block.props.type === "obstacle") {
+                    canMove = false;
+                }
+            }
+
+            if (canMove) {
+                this.x += (x * this.width);
+                this.y += (y * this.height);
+                this.eventManager.emit("player:moved", { block: this });
+            }
+        }
+    }
+
 }
 
 class Board {
@@ -247,7 +315,6 @@ class Board {
             context.stroke();
         }
     }
-    update(){}
     draw(context){
         this.grid(context);
     }
@@ -265,18 +332,22 @@ const loadGame = () => {
 
     canvas.width = Math.floor((columns * blockSize) * scale /2);
     canvas.height = Math.floor((rows * blockSize) * scale /2);
-    const game = new Game(b, rows, columns, blockSize, canvas, ctx);
+    const eventManager = new EventManager();
+    eventManager.on("targets", (t) => document.getElementById("targets").innerHTML = t)
+    new InputHandler(eventManager);
+    const game = new Game(b, rows, columns, blockSize, canvas, ctx, eventManager);
     
     game.draw(ctx);
 }
 
 class InputHandler {
-    constructor(game, ctx) {
-        this.game = game;
-        this.ctx = ctx;
+    constructor(eventManager) {
+        this.eventManager = eventManager;
         window.addEventListener("keydown", e => {
             e.preventDefault();
-            this.changeDirection(e.key);
+            if (e.key.includes("Arrow")) {
+                this.changeDirection(e.key);
+            }
         });
     }
     
@@ -288,14 +359,9 @@ class InputHandler {
             ArrowRight: [1, 0],
         }
         if (directions[key]) {
-            const [x, y] = this.game.direction;
             let allowedKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
             if (allowedKeys.includes(key)) {
-                this.game.direction = directions[key];
-                this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-                this.game.update();
-                this.game.events.emit("playerMoved", this.game.player);
-                this.game.draw(this.ctx);
+                this.eventManager.emit("direction:change", directions[key]);
             }
         }
     }

@@ -1,12 +1,20 @@
 const b = [
-    ["_","x","x","x","x","x","x","x"],
-    ["x","o","_","_","o","_","_","x"],
-    ["x","_","_","_","_","_","_","x"],
-    ["x","_","_","_","_","_","_","x"],
-    ["x","_","_","p","_","_","_","x"],
-    ["x","_","_","_","_","_","o","x"],
-    ["x","_","_","_","_","_","_","x"],
-    ["x","x","x","x","x","_","_","_"],
+    ["_","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x"],
+    ["x","o","_","_","o","_","_","x","o","_","_","o","_","_","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","p","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","_","_","_","o","x","_","_","_","_","_","o","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","x","x","x","x","_","_","_","x","x","x","x","_","_","_","x"],
+    ["x","o","_","_","o","_","_","x","o","_","_","o","_","_","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","_","_","_","_","_","o","x","_","_","_","_","_","o","x","x"],
+    ["x","_","_","_","_","_","_","x","_","_","_","_","_","_","x","x"],
+    ["x","x","x","x","x","_","_","_","x","x","x","x","_","_","_","x"],
+    ["_","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x"],
 ];
 
 const blockType = {
@@ -63,10 +71,10 @@ class Game {
         }
     }
     draw(context) {
-        this.board.draw(context);
         for (const block of this.blocks) {
             block.draw(context)
         }
+        this.board.draw(context);
     }
     makeBlocks(blocks) {
         for (let y = 0; y < blocks.length; y++) {
@@ -144,18 +152,18 @@ class Board {
 
 const loadGame = () => {
     const blockSize = 40;
-    const rows = 8;
-    const columns = 8;
+    const rows = 16;
+    const columns = 16;
     
     const canvas = document.getElementById("canvas");
-    canvas.style.width = `${blockSize*columns}px`;
-    canvas.style.height = `${blockSize*rows}px`;
+    // canvas.style.width = `${blockSize*columns}px`;
+    // canvas.style.height = `${blockSize*rows}px`;
     
     const ctx = canvas.getContext("2d");
     const scale = window.devicePixelRatio;
 
     canvas.width = Math.floor((columns * blockSize) * scale /2);
-    canvas.height = Math.floor((rows * blockSize) * scale/2);
+    canvas.height = Math.floor((rows * blockSize) * scale /2);
     const game = new Game(b, rows, columns, blockSize, canvas, ctx);
     
     game.draw(ctx);

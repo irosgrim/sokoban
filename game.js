@@ -5,24 +5,28 @@ const blockType = {
     strokeStyle: "gray",
     lineWidth: 6,
     type: "obstacle",
+    bg: 4,
   },
   2: {
     fillStyle: "yellow",
     strokeStyle: "brown",
     lineWidth: 6,
     type: "crate",
+    bg: 0,
   },
   3: {
     fillStyle: "green",
     strokeStyle: "green",
     lineWidth: 6,
     type: "target",
+    bg: 7,
   },
   4: {
     fillStyle: "white",
     strokeStyle: "black",
     lineWidth: 6,
     type: "player",
+    bg: null,
   },
 };
 
@@ -35,6 +39,7 @@ class Game {
     canvasElement,
     ctx,
     eventManager,
+    sprite,
   ) {
     this.ctx = ctx;
     this.targetsLeft = 0;
@@ -44,9 +49,10 @@ class Game {
     this.blocks = [];
     this.player = null;
     this.canvas = canvasElement;
-    this.bg = new Bg(columns * blockSize, rows * blockSize, blockSize);
+    this.bg = new Bg(columns * blockSize, rows * blockSize, blockSize, sprite);
     this.board = new Board(columns * blockSize, rows * blockSize, blockSize);
     this.eventManager = eventManager;
+    this.sprite = sprite;
     this.makeBlocks(blocks);
     this.eventManager.on(
       "direction:change",
@@ -62,11 +68,12 @@ class Game {
     for (const bl of this.blocks) {
       if (bl.props.type === "target") {
         if (bl.x === block.x && bl.y === block.y) {
-          block.props.fillStyle = "red";
+          block.props.bg = 1;
           block.props.strokeStyle = "red";
           block.isOnTarget = true;
 
           if (!wasOnTarget) {
+
             this.targetsLeft--;
             this.eventManager.emit("targets", this.targetsLeft);
           }
@@ -76,6 +83,7 @@ class Game {
     }
 
     if (wasOnTarget) {
+      block.props.bg = 0;
       block.props.fillStyle = blockType[2].fillStyle;
       block.props.strokeStyle = blockType[2].strokeStyle;
       block.isOnTarget = false;
@@ -96,7 +104,7 @@ class Game {
       block.draw(context);
     }
     this.player.draw(context);
-    this.board.draw(context);
+    // this.board.draw(context);
   }
 
   makeBlocks(blocks) {
@@ -126,13 +134,13 @@ class Game {
               this.blocks.push(
                 new MovableBlock(this.eventManager, {
                   ...blockConfig,
-                  zIndex: 2,
-                }),
+                  zIndex: 4,
+                }, this.sprite),
               );
               break;
             default:
               this.blocks.push(
-                new Block(this.eventManager, { ...blockConfig, zIndex: 3 }),
+                new Block(this.eventManager, { ...blockConfig, zIndex: 3 }, this.sprite),
               );
               break;
           }
@@ -148,30 +156,31 @@ class Game {
 }
 
 class Bg {
-  constructor(canvasWidth, canvasHeight, blockSize){
+  constructor(canvasWidth, canvasHeight, blockSize, sprite){
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.blockSize = blockSize;
+    this.sprite = sprite;
   }
   bgBlock(x, y) {
     const blockConfig = {
-            x: x,
-            y: y,
-            width: this.blockSize,
-            height: this.blockSize,
-            props: {
-              fillStyle: "#b1f292",
-              strokeStyle: "#b1f292",
-              lineWidth: 6,
-              type: "bg",
-            },
-          };
-    return new Block(null, { ...blockConfig, zIndex: 0 });
+      x: x,
+      y: y,
+      width: this.blockSize,
+      height: this.blockSize,
+      props: {
+        fillStyle: "#b1f292",
+        strokeStyle: "#b1f292",
+        lineWidth: 6,
+        type: "bg",
+        bg: 5,
+      },
+    };
+    return new Block(null, { ...blockConfig, zIndex: 0 }, this.sprite);
   }
   draw (context) {
     for (let y = 0; y < this.canvasHeight; y += this.blockSize) {
       for (let x = 0; x < this.canvasWidth; x += this.blockSize) {
-        console.log({x, y})
         this.bgBlock(x, y).draw(context);
       }
     }

@@ -1,6 +1,6 @@
 
 class Block {
-  constructor(eventManager, block) {
+  constructor(eventManager, block, sprite) {
     this.eventManager = eventManager;
     this.x = block.x;
     this.y = block.y;
@@ -9,10 +9,14 @@ class Block {
     this.props = block.props;
     this.zIndex = block.zIndex;
     this.isOnTarget = false;
+    this.sprite = sprite;
   }
 
   draw(context) {
-    context.fillStyle = this.props.fillStyle;
+    if (this.sprite && this.props.bg !== null) {
+        context.drawImage(this.sprite, this.width * this.props.bg, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    } else {
+        context.fillStyle = this.props.fillStyle;
     context.strokeStyle = this.props.strokeStyle;
     context.lineWidth = 6;
     if (this.props.type === "target") {
@@ -26,10 +30,37 @@ class Block {
         true,
       );
       context.fill();
-      context.lineWidth = 5;
+      context.lineWidth = 4;
       context.strokeStyle = "#003300";
       context.stroke();
-    } else {
+    } 
+     else if (this.props.type === "obstacle") {
+        context.strokeStyle = "rgba(255, 255, 255, 0)";
+        context.lineWidth = 1;
+        context.strokeRect(
+            this.x + 1,
+            this.y + 1,
+            this.height - 1,
+            this.width - 1,
+        );
+        context.fillStyle = this.props.fillStyle;
+        context.strokeStyle = this.props.strokeStyle;
+        context.lineWidth = 4;
+        context.strokeRect(
+            this.x + 2,
+            this.y + 2,
+            this.height - 5,
+            this.width - 5,
+        );
+        context.fillRect(
+            this.x + 4,
+            this.y + 4,
+            this.height - 9,
+            this.width - 9,
+        );
+        
+      }
+    else {
       context.fillRect(
         this.x + 6,
         this.y + 6,
@@ -43,19 +74,22 @@ class Block {
         this.width - 6,
       );
     }
+    }
+    
   }
 }
 
 class MovableBlock extends Block {
-  constructor(eventManager, block) {
-    super(eventManager, block);
+  constructor(eventManager, block, sprite) {
+    super(eventManager, block, sprite);
     this.eventManager = eventManager;
     this.eventManager.on("player:move", this.move.bind(this));
   }
 
-  hittingStuff(direction, blocks) {
+  hittingBlocksAtIndex(direction, blocks) {
     const [dx, dy] = direction;
     let block = null;
+    const hitting = [];
     for (let i = 0; i < blocks.length; i++) {
       block = blocks[i];
       if (block.props.type === "player") {
@@ -74,10 +108,14 @@ class MovableBlock extends Block {
         (dx !== 0 && isHittingHorizontally && block.y === this.y) ||
         (dy !== 0 && isHittingVertically && block.x === this.x)
       ) {
-        return i;
+        hitting.push(i);
+        if (hitting.length > 1) {
+            return hitting;
+        }
       }
     }
-    return -1;
+    
+    return hitting;
   }
 
   pushCrateIfPossible(block, data) {
@@ -90,7 +128,6 @@ class MovableBlock extends Block {
       block.y = newCrateY;
 
       this.eventManager.emit("block:move", { block });
-
       return true;
     }
 
@@ -131,18 +168,20 @@ class MovableBlock extends Block {
   }
 
   move(data) {
-    const hit = this.hittingStuff(data.direction, data.blocks);
+    const hit = this.hittingBlocksAtIndex(data.direction, data.blocks);
     if (this.props.type === "player") {
       const [x, y] = data.direction;
       let canMove = true;
 
-      if (hit > -1) {
-        const block = data.blocks[hit];
-        if (block.props.type === "crate") {
-          canMove = this.pushCrateIfPossible(block, data);
-        }
-        if (block.props.type === "obstacle") {
-          canMove = false;
+      if (hit.length > 0) {
+        for (const h of hit) {
+            const block = data.blocks[h];
+            if (block.props.type === "crate") {
+              canMove = this.pushCrateIfPossible(block, data);
+            }
+            if (block.props.type === "obstacle") {
+              canMove = false;
+            }
         }
       }
 

@@ -7,8 +7,8 @@ const loadGame = async () => {
   const level = await req.json();
 
   const blockSize = 40;
-  const rows = 16;
-  const columns = 16;
+  const rows = level[0].length;
+  const columns = level.length;
 
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");

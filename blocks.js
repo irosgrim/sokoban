@@ -1,4 +1,3 @@
-
 class Block {
   constructor(eventManager, block, sprite) {
     this.eventManager = eventManager;
@@ -14,68 +13,74 @@ class Block {
 
   draw(context) {
     if (this.sprite && this.props.bg !== null) {
-        context.drawImage(this.sprite, this.width * this.props.bg, 0, this.width, this.height, this.x, this.y, this.width, this.height);
-    } else {
-        context.fillStyle = this.props.fillStyle;
-    context.strokeStyle = this.props.strokeStyle;
-    context.lineWidth = 6;
-    if (this.props.type === "target") {
-      context.beginPath();
-      context.arc(
-        this.x + this.width / 2,
-        this.y + this.height / 2,
-        this.height / 2 - 6,
+      context.drawImage(
+        this.sprite,
+        this.width * this.props.bg,
         0,
-        Math.PI * 2,
-        true,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height,
       );
-      context.fill();
-      context.lineWidth = 4;
-      context.strokeStyle = "#003300";
-      context.stroke();
-    } 
-     else if (this.props.type === "obstacle") {
+    } else {
+      context.fillStyle = this.props.fillStyle;
+      context.strokeStyle = this.props.strokeStyle;
+      context.lineWidth = 6;
+      if (this.props.type === "target") {
+        context.beginPath();
+        context.arc(
+          this.x + this.width / 2,
+          this.y + this.height / 2,
+          this.height / 2 - 6,
+          0,
+          Math.PI * 2,
+          true,
+        );
+        context.fill();
+        context.lineWidth = 4;
+        context.strokeStyle = "#003300";
+        context.stroke();
+      } else if (this.props.type === "obstacle") {
         context.strokeStyle = "rgba(255, 255, 255, 0)";
         context.lineWidth = 1;
         context.strokeRect(
-            this.x + 1,
-            this.y + 1,
-            this.height - 1,
-            this.width - 1,
+          this.x + 1,
+          this.y + 1,
+          this.height - 1,
+          this.width - 1,
         );
         context.fillStyle = this.props.fillStyle;
         context.strokeStyle = this.props.strokeStyle;
         context.lineWidth = 4;
         context.strokeRect(
-            this.x + 2,
-            this.y + 2,
-            this.height - 5,
-            this.width - 5,
+          this.x + 2,
+          this.y + 2,
+          this.height - 5,
+          this.width - 5,
         );
         context.fillRect(
-            this.x + 4,
-            this.y + 4,
-            this.height - 9,
-            this.width - 9,
+          this.x + 4,
+          this.y + 4,
+          this.height - 9,
+          this.width - 9,
         );
-        
+      } else {
+        context.fillRect(
+          this.x + 6,
+          this.y + 6,
+          this.height - 12,
+          this.width - 12,
+        );
+        context.strokeRect(
+          this.x + 3,
+          this.y + 3,
+          this.height - 6,
+          this.width - 6,
+        );
       }
-    else {
-      context.fillRect(
-        this.x + 6,
-        this.y + 6,
-        this.height - 12,
-        this.width - 12,
-      );
-      context.strokeRect(
-        this.x + 3,
-        this.y + 3,
-        this.height - 6,
-        this.width - 6,
-      );
     }
-    }
-    
   }
 }
 
@@ -83,7 +88,7 @@ class MovableBlock extends Block {
   constructor(eventManager, block, sprite) {
     super(eventManager, block, sprite);
     this.eventManager = eventManager;
-    this.eventManager.on("player:move", this.move.bind(this));
+    this.eventManager.listen("player:move", this.move.bind(this));
   }
 
   hittingBlocksAtIndex(direction, blocks) {
@@ -110,11 +115,11 @@ class MovableBlock extends Block {
       ) {
         hitting.push(i);
         if (hitting.length > 1) {
-            return hitting;
+          return hitting;
         }
       }
     }
-    
+
     return hitting;
   }
 
@@ -127,7 +132,7 @@ class MovableBlock extends Block {
       block.x = newCrateX;
       block.y = newCrateY;
 
-      this.eventManager.emit("block:move", { block });
+      this.eventManager.broadcast("block:move", { block });
       return true;
     }
 
@@ -175,20 +180,20 @@ class MovableBlock extends Block {
 
       if (hit.length > 0) {
         for (const h of hit) {
-            const block = data.blocks[h];
-            if (block.props.type === "crate") {
-              canMove = this.pushCrateIfPossible(block, data);
-            }
-            if (block.props.type === "obstacle") {
-              canMove = false;
-            }
+          const block = data.blocks[h];
+          if (block.props.type === "crate") {
+            canMove = this.pushCrateIfPossible(block, data);
+          }
+          if (block.props.type === "obstacle") {
+            canMove = false;
+          }
         }
       }
 
       if (canMove) {
         this.x += x * this.width;
         this.y += y * this.height;
-        this.eventManager.emit("player:moved", { block: this });
+        this.eventManager.broadcast("player:moved", { block: this });
       }
     }
   }

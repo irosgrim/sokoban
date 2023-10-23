@@ -19,7 +19,7 @@ class InputHandler {
     if (directions[key]) {
       let allowedKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
       if (allowedKeys.includes(key)) {
-        this.eventManager.emit("direction:change", directions[key]);
+        this.eventManager.broadcast("direction:change", directions[key]);
       }
     }
   }

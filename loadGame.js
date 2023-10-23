@@ -1,8 +1,7 @@
 const sprite = new Image();
-sprite.src = "./assets/sprite.png"; 
+sprite.src = "./assets/sprite.png";
 
 const loadGame = async () => {
-  
   const req = await fetch("./map1.json");
   const level = await req.json();
 
@@ -17,8 +16,8 @@ const loadGame = async () => {
   canvas.width = Math.floor((columns * blockSize * scale) / 2);
   canvas.height = Math.floor((rows * blockSize * scale) / 2);
   const eventManager = new EventManager();
-  
-  eventManager.on(
+
+  eventManager.listen(
     "targets",
     (t) => (document.getElementById("targets").innerHTML = t),
   );
@@ -31,9 +30,9 @@ const loadGame = async () => {
     canvas,
     ctx,
     eventManager,
-    sprite
+    sprite,
   );
-    game.draw(ctx);
+  game.draw(ctx);
 };
 
 window.addEventListener("load", loadGame);

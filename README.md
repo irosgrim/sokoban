@@ -1,1 +1,1 @@
-# sokoban
+# sokoban clone

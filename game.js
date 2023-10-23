@@ -54,11 +54,11 @@ class Game {
     this.eventManager = eventManager;
     this.sprite = sprite;
     this.makeBlocks(blocks);
-    this.eventManager.on(
+    this.eventManager.listen(
       "direction:change",
       this.handleDirectionChange.bind(this),
     );
-    this.eventManager.on("block:move", this.handleBlockMoved.bind(this));
+    this.eventManager.listen("block:move", this.handleBlockMoved.bind(this));
     this.txt = document.getElementById("targets");
   }
 
@@ -73,9 +73,8 @@ class Game {
           block.isOnTarget = true;
 
           if (!wasOnTarget) {
-
             this.targetsLeft--;
-            this.eventManager.emit("targets", this.targetsLeft);
+            this.eventManager.broadcast("targets", this.targetsLeft);
           }
           return;
         }
@@ -89,7 +88,7 @@ class Game {
       block.isOnTarget = false;
 
       this.targetsLeft++;
-      this.eventManager.emit("targets", this.targetsLeft);
+      this.eventManager.broadcast("targets", this.targetsLeft);
     }
   }
   handleDirectionChange(direction) {
@@ -113,7 +112,7 @@ class Game {
         if (blockType[blocks[y][x]]) {
           if (blockType[blocks[y][x]].type === "target") {
             this.targetsLeft += 1;
-            this.eventManager.emit("targets", this.targetsLeft);
+            this.eventManager.broadcast("targets", this.targetsLeft);
           }
           let blockConfig = {
             x: x * this.blockSize,
@@ -132,15 +131,23 @@ class Game {
               break;
             case "crate":
               this.blocks.push(
-                new MovableBlock(this.eventManager, {
-                  ...blockConfig,
-                  zIndex: 4,
-                }, this.sprite),
+                new MovableBlock(
+                  this.eventManager,
+                  {
+                    ...blockConfig,
+                    zIndex: 4,
+                  },
+                  this.sprite,
+                ),
               );
               break;
             default:
               this.blocks.push(
-                new Block(this.eventManager, { ...blockConfig, zIndex: 3 }, this.sprite),
+                new Block(
+                  this.eventManager,
+                  { ...blockConfig, zIndex: 3 },
+                  this.sprite,
+                ),
               );
               break;
           }
@@ -151,12 +158,15 @@ class Game {
   }
 
   movePlayer(direction) {
-    this.eventManager.emit("player:move", { direction, blocks: this.blocks });
+    this.eventManager.broadcast("player:move", {
+      direction,
+      blocks: this.blocks,
+    });
   }
 }
 
 class Bg {
-  constructor(canvasWidth, canvasHeight, blockSize, sprite){
+  constructor(canvasWidth, canvasHeight, blockSize, sprite) {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.blockSize = blockSize;
@@ -178,7 +188,7 @@ class Bg {
     };
     return new Block(null, { ...blockConfig, zIndex: 0 }, this.sprite);
   }
-  draw (context) {
+  draw(context) {
     for (let y = 0; y < this.canvasHeight; y += this.blockSize) {
       for (let x = 0; x < this.canvasWidth; x += this.blockSize) {
         this.bgBlock(x, y).draw(context);
@@ -213,4 +223,3 @@ class Board {
     this.grid(context);
   }
 }
-

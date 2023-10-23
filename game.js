@@ -26,7 +26,7 @@ const blockType = {
     strokeStyle: "black",
     lineWidth: 6,
     type: "player",
-    bg: null,
+    bg: 0,
   },
 };
 
@@ -124,10 +124,14 @@ class Game {
 
           switch (blockConfig.props.type) {
             case "player":
-              this.player = new MovableBlock(this.eventManager, {
-                ...blockConfig,
-                zIndex: 4,
-              });
+              this.player = new MovableBlock(
+                this.eventManager,
+                {
+                  ...blockConfig,
+                  zIndex: 4,
+                },
+                this.sprite,
+              );
               break;
             case "crate":
               this.blocks.push(

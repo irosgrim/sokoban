@@ -1,3 +1,9 @@
+const PLAYER_SPRITE = new Map([
+  ["DOWN", 0],
+  ["UP", 2],
+  ["RIGHT", 3],
+  ["LEFT", 1],
+]);
 class Block {
   constructor(eventManager, block, sprite) {
     this.eventManager = eventManager;
@@ -9,76 +15,86 @@ class Block {
     this.zIndex = block.zIndex;
     this.isOnTarget = false;
     this.sprite = sprite;
+    this.direction = null;
+    if (this.props.type === "player") {
+      this.direction = "DOWN";
+      this.eventManager.listen("player:move", (data) => {
+        const [x, y] = data.direction;
+        if (x > 0) this.direction = "RIGHT";
+        if (x < 0) this.direction = "LEFT";
+
+        if (y > 0) this.direction = "DOWN";
+        if (y < 0) this.direction = "UP";
+        if (x === 0 && y === 0) this.direction = "DOWN";
+      });
+    }
+  }
+
+  spriteToBlock(context) {
+    let sx = this.width * this.props.bg;
+    let sy = 0;
+    if (this.props.type === "player") {
+      sx = this.width * PLAYER_SPRITE.get(this.direction);
+      sy = this.height;
+    }
+    context.drawImage(
+      this.sprite,
+      sx,
+      sy,
+      this.width,
+      this.height,
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+    );
+  }
+
+  drawObstacle(context) {
+    context.strokeStyle = "rgba(255, 255, 255, 0)";
+    context.lineWidth = 1;
+    context.strokeRect(this.x + 1, this.y + 1, this.height - 1, this.width - 1);
+    context.fillStyle = this.props.fillStyle;
+    context.strokeStyle = this.props.strokeStyle;
+    context.lineWidth = 4;
+    context.strokeRect(this.x + 2, this.y + 2, this.height - 5, this.width - 5);
+    context.fillRect(this.x + 4, this.y + 4, this.height - 9, this.width - 9);
+  }
+
+  drawTarget(context) {
+    context.beginPath();
+    context.arc(
+      this.x + this.width / 2,
+      this.y + this.height / 2,
+      this.height / 2 - 6,
+      0,
+      Math.PI * 2,
+      true,
+    );
+    context.fill();
+    context.lineWidth = 4;
+    context.strokeStyle = "#003300";
+    context.stroke();
+  }
+
+  drawOtherBlocks(context) {
+    context.fillRect(this.x + 6, this.y + 6, this.height - 12, this.width - 12);
+    context.strokeRect(this.x + 3, this.y + 3, this.height - 6, this.width - 6);
   }
 
   draw(context) {
     if (this.sprite && this.props.bg !== null) {
-      context.drawImage(
-        this.sprite,
-        this.width * this.props.bg,
-        0,
-        this.width,
-        this.height,
-        this.x,
-        this.y,
-        this.width,
-        this.height,
-      );
+      this.spriteToBlock(context);
     } else {
       context.fillStyle = this.props.fillStyle;
       context.strokeStyle = this.props.strokeStyle;
       context.lineWidth = 6;
       if (this.props.type === "target") {
-        context.beginPath();
-        context.arc(
-          this.x + this.width / 2,
-          this.y + this.height / 2,
-          this.height / 2 - 6,
-          0,
-          Math.PI * 2,
-          true,
-        );
-        context.fill();
-        context.lineWidth = 4;
-        context.strokeStyle = "#003300";
-        context.stroke();
+        this.drawTarget(context);
       } else if (this.props.type === "obstacle") {
-        context.strokeStyle = "rgba(255, 255, 255, 0)";
-        context.lineWidth = 1;
-        context.strokeRect(
-          this.x + 1,
-          this.y + 1,
-          this.height - 1,
-          this.width - 1,
-        );
-        context.fillStyle = this.props.fillStyle;
-        context.strokeStyle = this.props.strokeStyle;
-        context.lineWidth = 4;
-        context.strokeRect(
-          this.x + 2,
-          this.y + 2,
-          this.height - 5,
-          this.width - 5,
-        );
-        context.fillRect(
-          this.x + 4,
-          this.y + 4,
-          this.height - 9,
-          this.width - 9,
-        );
+        this.drawObstacle(context);
       } else {
-        context.fillRect(
-          this.x + 6,
-          this.y + 6,
-          this.height - 12,
-          this.width - 12,
-        );
-        context.strokeRect(
-          this.x + 3,
-          this.y + 3,
-          this.height - 6,
-          this.width - 6,
-        );
+        this.drawOtherBlocks(context);
       }
     }
   }
@@ -193,7 +209,7 @@ class MovableBlock extends Block {
       if (canMove) {
         this.x += x * this.width;
         this.y += y * this.height;
-        this.eventManager.broadcast("player:moved", { block: this });
+        // this.eventManager.broadcast("player:moved", { block: this, direction: data.direction });
       }
     }
   }

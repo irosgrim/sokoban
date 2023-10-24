@@ -27,7 +27,6 @@ const runGame = async (customLevel, canvas, ctx, eventManager, sprite) => {
   let level = null;
   if (customLevel) {
     level = JSON.parse(atob(customLevel));
-    console.log(JSON.stringify(level));
   } else {
     const req = await fetch("./map1.json");
     level = await req.json();
@@ -52,7 +51,6 @@ const runGame = async (customLevel, canvas, ctx, eventManager, sprite) => {
   game.draw(ctx);
 }
 
-// W1swLDAsMCwwLDAsMSwxLDAsMCwxLDEsMSwxLDEsMSwwXSxbMCwwLDAsMCwxLDAsMCwxLDEsMCwwLDAsMCwzLDEsMF0sWzAsMCwwLDEsMywwLDAsMywwLDAsMCwwLDAsMCwxLDBdLFswLDAsMSwwLDAsMCwwLDAsMCwwLDIsMCwwLDAsMSwxXSxbMCwxLDAsNCwwLDAsMCwwLDAsMCwwLDAsMywwLDAsMV0sWzEsMCwwLDMsMCwwLDIsMCwwLDMsMCwwLDAsMiwwLDFdLFsxLDAsMCwwLDAsMCwxLDAsMCwwLDAsMCwwLDAsMCwxXSxbMCwxLDAsMCwxLDAsMCwwLDAsMCwxLDEsMCwwLDEsMF0sWzAsMSwwLDAsMiwwLDAsMCwwLDAsMSwwLDIsMCwxLDBdLFsxLDAsMCwwLDAsMywxLDAsMiwwLDEsMCwyLDAsMSwwXSxbMSwwLDMsMCwwLDAsMSwwLDAsMCwxLDAsMCwwLDEsMF0sWzEsMCwwLDAsMCwwLDAsMSwxLDEsMCwwLDAsMCwxLDBdLFsxLDAsMCwxLDAsMCwyLDEsMCwwLDAsMCwyLDAsMSwwXSxbMSwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwxLDAsMF0sWzEsMSwwLDAsMCwwLDMsMSwxLDEsMCwwLDEsMCwwLDBdLFswLDEsMSwxLDEsMSwxLDAsMCwxLDEsMSwwLDAsMCwwXV0=
 const saveLevel = (levelData) => {
   const { level } = levelData;
   const j = JSON.stringify(level);
@@ -66,6 +64,19 @@ const saveLevel = (levelData) => {
 }
 
 const loadGame = async () => {
+  const buttons = document.querySelectorAll("button");
+
+  for(const button of buttons) {
+    if (button.id.includes("Arrow")) {
+      button.addEventListener("click", (e) =>{
+        const keydownEvent = new KeyboardEvent("keydown", {
+          key: button.id,
+          code: button.id
+        });
+        window.dispatchEvent(keydownEvent);
+      });
+    }
+  }
   const {blockSize, rows, columns, scale} = CONFIG;
   const status = document.getElementById("status");
   const editorMenuCanvas = document.getElementById("sprite");

@@ -1,3 +1,7 @@
+* {
+    user-select: none;
+}
+
 #sprite {
     border: 1px solid #000000;
 }
@@ -6,4 +10,23 @@
     width: 100%;
     max-width: 800px;
     object-fit: contain;
+}
+
+.nav .row {
+    display: flex;
+    justify-content: space-evenly;
+    width: 240px;
+}
+.row button{
+    width: 80px;
+    height: 80px;
+    margin: 0;
+    background-color: #ffffff;
+    border: 1px solid #ababab;
+}
+.down {
+    border-left: none!important;
+    border-right: none!important;
+    border-top: none!important;
+    border-bottom: 1px solid #ababab;
 }

@@ -56,14 +56,12 @@ class EditorMenu {
       {type: "delete", spritePosition: [0, 0], value: 0},
       {type: "crate", spritePosition: [0,2], value: 2},
       {type: "obstacle", spritePosition: [0, 1], value: 1},
-      // {type: "bg", spritePosition: [0, 5], value: 0},
       {type: "target", spritePosition: [0, 3], value: 3},
       {type: "player", spritePosition: [0, 4], value: 4},
     ];
     //image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
     for (let i=0; i < spriteElements.length; i++) {
       const {type, spritePosition} = spriteElements[i];
-      // if (type !== "delete") {
         this.context.drawImage(
           this.sprite,
           spritePosition[1] * this.config.blockSize,
@@ -75,19 +73,12 @@ class EditorMenu {
           this.config.blockSize,
           this.config.blockSize,
         );
-        // } else {
-        //   this.context.fillText("Erase", this.config.blockSize * i +8, this.config.blockSize/2 + 4);
-        //   this.context.lineWidth = 3;
-        //   this.context.strokeStyle = "red",
-        //   this.context.rect(this.config.blockSize * i, 0, this.config.blockSize, this.config.blockSize);
-        //   this.context.stroke()
-        // }
-
+       
         this.menuItems.push(spriteElements[i]);
     }
-    this.context.fillText("Save", this.config.blockSize * 15 +8, this.config.blockSize/2 + 4);
-    this.context.lineWidth = 3;
-    this.context.strokeStyle = "red",
+    this.context.fillText("Export", this.config.blockSize * 15 +4, this.config.blockSize/2 + 4);
+    this.context.lineWidth = 1;
+    this.context.strokeStyle = "black",
     this.context.rect(this.config.blockSize * 15, 0, this.config.blockSize, this.config.blockSize);
     this.context.stroke()
   }
@@ -116,37 +107,28 @@ class Editor {
   getPosition (e, canvasEl) {
     const { scale, blockSize } = CONFIG;
     const rect = canvasEl.getBoundingClientRect();
-    
-    // scale the mouse coordinates to match the scaled canvas
-    const x = (e.clientX - rect.left) * (canvasEl.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvasEl.height / rect.height);
-    
+
+    let x, y;
+
+    if (e.touches) { // Touch event
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else { // Mouse event
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+
+    // scale the mouse or touch coordinates to match the scaled canvas
+    x *= (canvasEl.width / rect.width);
+    y *= (canvasEl.height / rect.height);
+
     // scale the blockSize to match the scaled canvas
     const scaledBlockSize = blockSize * scale / 2;
-    
+
     const col = Math.floor(x / scaledBlockSize);
     const row = Math.floor(y / scaledBlockSize);
-    
+
     return [col, row];
-  }
-
-  paint (data) {
-    const { position, choice } = data;
-
-    if (choice.value === 4) {
-      for (let y = 0; y < this.maLevel.length; y++) {
-        for (let x = 0; x < this.maLevel[y].length; x++) {
-          if (this.maLevel[y][x] === 4) {
-            this.maLevel[y][x] = 0;
-          }
-        }
-      }
-      this.maLevel[position[1]][position[0]] = 4;
-    } else {
-      this.maLevel[position[1]][position[0]] = choice.value;
-    }
-    
-    this.draw();
   }
 
 
@@ -193,10 +175,16 @@ class EditorEvents extends Editor {
       this.isMouseDown = false;
       this.menu.canvas.addEventListener("mouseup", this.menuOnMouseUp.bind(this));
       this.canvas.addEventListener("mousemove", this.editorOnMouseMove);
-      this.eventManager.listen("grid:paint", (data) => this.paint(data));
       this.canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
       this.canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
       this.canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
+      
+      this.menu.canvas.addEventListener("touchend", this.menuOnMouseUp.bind(this));
+      this.canvas.addEventListener("touchmove", this.onMouseMove.bind(this));
+      this.canvas.addEventListener("touchstart", this.onMouseDown.bind(this));
+      this.canvas.addEventListener("touchend", this.onMouseUp.bind(this));
+      
+      this.eventManager.listen("grid:paint", (data) => this.paint(data));
   }
  
   onMouseMove(e) {

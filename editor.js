@@ -131,6 +131,25 @@ class Editor {
     return [col, row];
   }
 
+  paint (data) {
+    const { position, choice } = data;
+
+    if (choice.value === 4) {
+      for (let y = 0; y < this.maLevel.length; y++) {
+        for (let x = 0; x < this.maLevel[y].length; x++) {
+          if (this.maLevel[y][x] === 4) {
+            this.maLevel[y][x] = 0;
+          }
+        }
+      }
+      this.maLevel[position[1]][position[0]] = 4;
+    } else {
+      this.maLevel[position[1]][position[0]] = choice.value;
+    }
+    
+    this.draw();
+  }
+
 
   draw () {
     for (let y = 0; y < this.maLevel.length; y++) {
@@ -200,7 +219,6 @@ class EditorEvents extends Editor {
     const [x, y] = this.getPosition(e, this.menu.canvas);
     if (x <= this.menu.menuItems.length) {
       this.choice = this.menu.menuItems[x];
-      console.log(this.choice)
     }
     if (x === 15) {
       this.eventManager.broadcast("editor:save", {level: this.maLevel});

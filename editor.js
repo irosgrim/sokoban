@@ -95,7 +95,7 @@ class EditorMenu {
 }
 
 class Editor {
-  constructor(eventManager, canvas, ctx, menu, sprite) {
+  constructor(eventManager, canvas, ctx, menu, sprite, customLevel) {
     this.eventManager = eventManager;
     this.canvas = canvas;
     this.context = ctx;
@@ -103,7 +103,14 @@ class Editor {
     this.sprite = sprite;
     this.isMouseDown = false;
     this.choice = {type: "obstacle", spritePosition: [0, 4], value: 1};
-    this.maLevel = Array.from({ length: 16 }, () => Array.from({ length: 16 }).fill(0));
+    this.maLevel = [];
+    if (customLevel) {
+      const level = JSON.parse(atob(customLevel));
+      console.log(level)
+      this.maLevel = level
+    } else {
+      this.maLevel = Array.from({ length: 16 }, () => Array.from({ length: 16 }).fill(0));
+    }
   }
 
   getPosition (e, canvasEl) {
@@ -181,8 +188,8 @@ class Editor {
 }
 
 class EditorEvents extends Editor {
-    constructor(eventManager, canvas, ctx, menu, sprite) {
-      super(eventManager, canvas, ctx, menu, sprite);
+    constructor(eventManager, canvas, ctx, menu, sprite, customLevel) {
+      super(eventManager, canvas, ctx, menu, sprite, customLevel);
       this.isMouseDown = false;
       this.menu.canvas.addEventListener("mouseup", this.menuOnMouseUp.bind(this));
       this.canvas.addEventListener("mousemove", this.editorOnMouseMove);

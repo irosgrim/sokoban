@@ -1,8 +1,8 @@
 const PLAYER_SPRITE = new Map([
-  ["DOWN", 0],
-  ["UP", 2],
-  ["RIGHT", 3],
-  ["LEFT", 1],
+  ["DOWN", 4],
+  ["UP", 6],
+  ["RIGHT", 7],
+  ["LEFT", 5],
 ]);
 class Block {
   constructor(eventManager, block, sprite) {
@@ -35,6 +35,8 @@ class Block {
     let sy = 0;
     if (this.props.type === "player") {
       sx = this.width * PLAYER_SPRITE.get(this.direction);
+    }
+    if (this.props.type === "crate" && this.isOnTarget) {
       sy = this.height;
     }
     context.drawImage(

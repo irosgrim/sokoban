@@ -5,28 +5,28 @@ const blockType = {
     strokeStyle: "gray",
     lineWidth: 6,
     type: "obstacle",
-    bg: 4,
+    bg: 1,
   },
   2: {
     fillStyle: "yellow",
     strokeStyle: "brown",
     lineWidth: 6,
     type: "crate",
-    bg: 0,
+    bg: 2,
   },
   3: {
     fillStyle: "green",
     strokeStyle: "green",
     lineWidth: 6,
     type: "target",
-    bg: 7,
+    bg: 3,
   },
   4: {
     fillStyle: "white",
     strokeStyle: "black",
     lineWidth: 6,
     type: "player",
-    bg: 0,
+    bg: 4,
   },
 };
 
@@ -68,7 +68,7 @@ class Game {
     for (const bl of this.blocks) {
       if (bl.props.type === "target") {
         if (bl.x === block.x && bl.y === block.y) {
-          block.props.bg = 1;
+          block.props.bg = 2;
           block.props.strokeStyle = "red";
           block.isOnTarget = true;
 
@@ -82,7 +82,7 @@ class Game {
     }
 
     if (wasOnTarget) {
-      block.props.bg = 0;
+      block.props.bg = 2;
       block.props.fillStyle = blockType[2].fillStyle;
       block.props.strokeStyle = blockType[2].strokeStyle;
       block.isOnTarget = false;
@@ -187,7 +187,7 @@ class Bg {
         strokeStyle: "#b1f292",
         lineWidth: 6,
         type: "bg",
-        bg: 5,
+        bg: 0,
       },
     };
     return new Block(null, { ...blockConfig, zIndex: 0 }, this.sprite);
@@ -198,32 +198,5 @@ class Bg {
         this.bgBlock(x, y).draw(context);
       }
     }
-  }
-}
-
-class Board {
-  constructor(canvasWidth, canvasHeight, blockSize) {
-    this.blockSize = blockSize;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
-  }
-  grid(context) {
-    context.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += this.blockSize) {
-      context.beginPath();
-      context.strokeStyle = "#d3d3d3";
-      context.moveTo(x, 0);
-      context.lineTo(x, this.canvasHeight);
-      context.stroke();
-    }
-    for (let y = 0; y < this.canvasHeight; y += this.blockSize) {
-      context.beginPath();
-      context.moveTo(0, y);
-      context.lineTo(this.canvasWidth, y);
-      context.stroke();
-    }
-  }
-  draw(context) {
-    this.grid(context);
   }
 }

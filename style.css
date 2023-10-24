@@ -1,4 +1,8 @@
-#canvas {
+#sprite {
+    border: 1px solid #000000;
+}
+
+#canvas, #sprite {
     width: 100%;
     max-width: 800px;
     object-fit: contain;

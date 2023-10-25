@@ -1,6 +1,10 @@
 * {
     user-select: none;
 }
+body {
+    display: flex;
+    flex-direction: column;
+}
 
 #sprite {
     border: 1px solid #000000;
@@ -16,17 +20,4 @@
     display: flex;
     justify-content: space-evenly;
     width: 240px;
-}
-.row button{
-    width: 80px;
-    height: 80px;
-    margin: 0;
-    background-color: #ffffff;
-    border: 1px solid #ababab;
-}
-.down {
-    border-left: none!important;
-    border-right: none!important;
-    border-top: none!important;
-    border-bottom: 1px solid #ababab;
 }

@@ -12,12 +12,6 @@ body {
 
 #canvas, #sprite {
     width: 100%;
-    max-width: 800px;
-    object-fit: contain;
-}
-
-.nav .row {
-    display: flex;
-    justify-content: space-evenly;
-    width: 240px;
+    max-width: 400px;
+    /* object-fit: contain; */
 }

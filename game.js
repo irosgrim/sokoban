@@ -103,7 +103,6 @@ class Game {
       block.draw(context);
     }
     this.player.draw(context);
-    // this.board.draw(context);
   }
 
   makeBlocks(blocks) {

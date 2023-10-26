@@ -1,11 +1,14 @@
 * {
     user-select: none;
+    box-sizing: border-box;
 }
 body {
     display: flex;
     flex-direction: column;
 }
-
+#status {
+    display: flex;
+}
 #sprite {
     border: 1px solid #000000;
 }
@@ -14,4 +17,12 @@ body {
     width: 100%;
     max-width: 400px;
     /* object-fit: contain; */
+}
+.row {
+    display: flex;
+}
+
+#sprite {
+    background-color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 2px;
 }

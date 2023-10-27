@@ -284,9 +284,9 @@ class GameMenu {
     // help icon
     // this.ctx.drawImage(this.menuSprite, 240, 0, 40, 40, 40 * 15, 0, 40, 40);
 
-    this.ctx.font = "22px courier";
+    this.ctx.font = "14px PressStart2P-Regular";
     this.ctx.fillStyle = "white";
-    this.ctx.fillText(`Targets: ${this.targetsLeft}`, 10, 28);
+    this.ctx.fillText(`Targets: ${this.targetsLeft} `, 10, 28);
     this.ctx.fillText(`Distance: ${this.distanceWalked}`, 170, 28);
 
     this.ctx.fillText(

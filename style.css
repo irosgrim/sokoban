@@ -2,6 +2,15 @@
     user-select: none;
     box-sizing: border-box;
 }
+@font-face {
+  font-family: 'PressStart2P-Regular';
+  src: url("./assets/PressStart2P-Regular.ttf") format("truetype");
+}
+
+.pixel-font {
+    font-family: 'PressStart2P-Regular', Courier, monospace;;
+}
+
 body {
     display: flex;
     flex-direction: column;

@@ -4,6 +4,16 @@ sprite.src = "./assets/sprite.png";
 const menuSprite = new Image();
 menuSprite.src = "./assets/menu.png";
 
+const loadFonts = async () =>{
+  const font = new FontFace("PressStart2P-Regular", "url(./assets/PressStart2P-Regular.ttf)", {
+    style: "normal",
+  });
+  await font.load();
+  document.fonts.add(font);
+  // enable font with CSS class
+  document.body.classList.add("pixel-font");
+}
+
 let eventManager = new EventManager();
 
 const setupCanvas = (
@@ -114,6 +124,7 @@ const { blockSize, rows, columns, scale } = CONFIG;
 const { canvas, ctx } = setupCanvas("canvas", rows, columns, blockSize, scale);
 
 const loadGame = async () => {
+  await loadFonts();
   const params = new URLSearchParams(window.location.search);
   const editor = params.get("editor");
   const customLevel = params.get("level");

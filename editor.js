@@ -78,13 +78,13 @@ class EditorMenu {
     }
     this.context.drawImage(
       menuSprite,
-      200,
+      160,
       0,
-      80,
+      120,
       40,
-      this.config.blockSize * 14,
+      this.config.blockSize * 13,
       0,
-      80,
+      120,
       40,
     );
   }
@@ -102,7 +102,6 @@ class Editor {
     this.maLevel = [];
     if (customLevel) {
       const level = JSON.parse(atob(customLevel));
-      console.log(level);
       this.maLevel = level;
     } else {
       this.maLevel = Array.from({ length: 16 }, () =>
@@ -234,8 +233,11 @@ class EditorEvents extends Editor {
     if (x <= this.menu.menuItems.length) {
       this.choice = this.menu.menuItems[x];
     }
-    if (x === 14) {
+    if (x === 13) {
       this.eventManager.broadcast("editor:save", { level: this.maLevel });
+    }
+    if (x === 14) {
+      this.eventManager.broadcast("editor:download", { level: this.maLevel });
     }
   }
 

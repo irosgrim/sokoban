@@ -106,6 +106,19 @@ const runGame = async (customLevel, canvas, ctx, eventManager, sprite) => {
   );
   new Game(level, rows, columns, blockSize, canvas, ctx, eventManager, sprite);
 };
+const downloadLevel = (levelData)=>{
+  const blob = new Blob([JSON.stringify(levelData.level)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "custom-level.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
 
 const saveLevel = (levelData) => {
   const { level } = levelData;
@@ -114,6 +127,7 @@ const saveLevel = (levelData) => {
   const params = new URLSearchParams(window.location.search);
   params.delete("editor");
   params.set("level", b);
+  
   const newUrl = `${window.location.protocol}//${window.location.host}${
     window.location.pathname
   }?${params.toString()}`;
@@ -134,6 +148,7 @@ const loadGame = async () => {
   } else {
     runEditor(customLevel, canvas, ctx, sprite);
     eventManager.listen("editor:save", saveLevel);
+    eventManager.listen("editor:download", downloadLevel);
   }
 };
 

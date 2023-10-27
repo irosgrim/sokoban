@@ -275,11 +275,13 @@ class GameMenu {
   }
 
   draw() {
+    //image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.drawImage(this.menuSprite, 0, 0, 120, 40, 40 * 10, 0, 120, 40);
+    this.ctx.drawImage(this.menuSprite, 0, 0, 40, 40, 40 * 10, 0, 40, 40);
+    this.ctx.drawImage(this.menuSprite, 40, 0, 40, 40, 40 * 12, 0, 40, 40);
 
-    this.ctx.drawImage(this.menuSprite, 120, 0, 40, 40, 40 * 14, 0, 40, 40);
-    this.ctx.drawImage(this.menuSprite, 160, 0, 40, 40, 40 * 15, 0, 40, 40);
+    this.ctx.drawImage(this.menuSprite, 80, 0, 40, 40, 40 * 14, 0, 40, 40);
+    this.ctx.drawImage(this.menuSprite, 120, 0, 40, 40, 40 * 15, 0, 40, 40);
 
     // help icon
     // this.ctx.drawImage(this.menuSprite, 240, 0, 40, 40, 40 * 15, 0, 40, 40);

@@ -24,8 +24,6 @@ body {
 
 #canvas, #sprite {
     width: 100%;
-    max-width: 400px;
-    /* object-fit: contain; */
 }
 .row {
     display: flex;
@@ -34,4 +32,8 @@ body {
 #sprite {
     background-color: rgba(0, 0, 0, 0.7);
     margin-bottom: 2px;
+}
+
+.game {
+    max-width: 700px;
 }

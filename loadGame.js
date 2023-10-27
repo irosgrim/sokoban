@@ -4,15 +4,19 @@ sprite.src = "./assets/sprite.png";
 const menuSprite = new Image();
 menuSprite.src = "./assets/menu.png";
 
-const loadFonts = async () =>{
-  const font = new FontFace("PressStart2P-Regular", "url(./assets/PressStart2P-Regular.ttf)", {
-    style: "normal",
-  });
+const loadFonts = async () => {
+  const font = new FontFace(
+    "PressStart2P-Regular",
+    "url(./assets/PressStart2P-Regular.ttf)",
+    {
+      style: "normal",
+    },
+  );
   await font.load();
   document.fonts.add(font);
   // enable font with CSS class
   document.body.classList.add("pixel-font");
-}
+};
 
 let eventManager = new EventManager();
 
@@ -106,11 +110,13 @@ const runGame = async (customLevel, canvas, ctx, eventManager, sprite) => {
   );
   new Game(level, rows, columns, blockSize, canvas, ctx, eventManager, sprite);
 };
-const downloadLevel = (levelData)=>{
-  const blob = new Blob([JSON.stringify(levelData.level)], { type: 'application/json' });
+const downloadLevel = (levelData) => {
+  const blob = new Blob([JSON.stringify(levelData.level)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = "custom-level.json";
   document.body.appendChild(a);
@@ -118,7 +124,7 @@ const downloadLevel = (levelData)=>{
   document.body.removeChild(a);
 
   URL.revokeObjectURL(url);
-}
+};
 
 const saveLevel = (levelData) => {
   const { level } = levelData;
@@ -127,7 +133,7 @@ const saveLevel = (levelData) => {
   const params = new URLSearchParams(window.location.search);
   params.delete("editor");
   params.set("level", b);
-  
+
   const newUrl = `${window.location.protocol}//${window.location.host}${
     window.location.pathname
   }?${params.toString()}`;

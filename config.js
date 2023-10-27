@@ -1,6 +1,17 @@
-const CONFIG = {
-  blockSize: 40,
-  rows: 16,
-  columns: 16,
-  scale: window.devicePixelRatio,
+const cfg = () => {
+  const rows = 16;
+  const columns = 16;
+  const scale = window.devicePixelRatio;
+  const blockSize = 40 * scale;
+  const spriteSize = 80;
+
+  return {
+    blockSize,
+    rows,
+    columns,
+    scale,
+    spriteSize,
+  };
 };
+
+const CONFIG = cfg();

@@ -61,31 +61,31 @@ class EditorMenu {
     ];
     //image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
     for (let i = 0; i < spriteElements.length; i++) {
-      const { type, spritePosition } = spriteElements[i];
+      const { spritePosition } = spriteElements[i];
       this.context.drawImage(
         this.sprite,
-        spritePosition[1] * this.config.blockSize,
-        spritePosition[0] * this.config.blockSize,
-        this.config.blockSize,
-        this.config.blockSize,
-        this.config.blockSize * i,
+        spritePosition[1] * CONFIG.spriteSize,
+        spritePosition[0] * CONFIG.spriteSize,
+        CONFIG.spriteSize,
+        CONFIG.spriteSize,
+        CONFIG.blockSize * i,
         0,
-        this.config.blockSize,
-        this.config.blockSize,
+        CONFIG.blockSize,
+        CONFIG.blockSize,
       );
 
       this.menuItems.push(spriteElements[i]);
     }
     this.context.drawImage(
       menuSprite,
-      160,
+      4 * CONFIG.spriteSize,
       0,
-      120,
-      40,
-      this.config.blockSize * 13,
+      3 * CONFIG.spriteSize,
+      CONFIG.spriteSize,
+      CONFIG.blockSize * 13,
       0,
-      120,
-      40,
+      3 * CONFIG.blockSize,
+      CONFIG.blockSize,
     );
   }
 }
@@ -111,30 +111,22 @@ class Editor {
   }
 
   getPosition(e, canvasEl) {
-    const { scale, blockSize } = CONFIG;
     const rect = canvasEl.getBoundingClientRect();
-
     let x, y;
 
     if (e.touches) {
-      // Touch event
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
     } else {
-      // Mouse event
       x = e.clientX - rect.left;
       y = e.clientY - rect.top;
     }
 
-    // scale the mouse or touch coordinates to match the scaled canvas
     x *= canvasEl.width / rect.width;
     y *= canvasEl.height / rect.height;
 
-    // scale the blockSize to match the scaled canvas
-    const scaledBlockSize = (blockSize * scale) / 2;
-
-    const col = Math.floor(x / scaledBlockSize);
-    const row = Math.floor(y / scaledBlockSize);
+    const col = Math.floor(x / CONFIG.blockSize);
+    const row = Math.floor(y / CONFIG.blockSize);
 
     return [col, row];
   }
@@ -161,34 +153,28 @@ class Editor {
   draw() {
     for (let y = 0; y < this.maLevel.length; y++) {
       for (let x = 0; x < this.maLevel[y].length; x++) {
-        let blockConfig = {
-          x: this.maLevel[y][x] * 40,
-          y: 0,
-          width: 40,
-          height: 40,
-        };
         // reset bg
         this.context.drawImage(
           this.sprite,
           0,
           0,
-          blockConfig.width,
-          blockConfig.height,
-          x * 40,
-          y * 40,
-          blockConfig.width,
-          blockConfig.height,
+          CONFIG.spriteSize,
+          CONFIG.spriteSize,
+          x * CONFIG.blockSize,
+          y * CONFIG.blockSize,
+          CONFIG.blockSize,
+          CONFIG.blockSize,
         );
         this.context.drawImage(
           this.sprite,
-          blockConfig.x,
-          blockConfig.y,
-          blockConfig.width,
-          blockConfig.height,
-          x * 40,
-          y * 40,
-          blockConfig.width,
-          blockConfig.height,
+          this.maLevel[y][x] * CONFIG.spriteSize,
+          0,
+          CONFIG.spriteSize,
+          CONFIG.spriteSize,
+          x * CONFIG.blockSize,
+          y * CONFIG.blockSize,
+          CONFIG.blockSize,
+          CONFIG.blockSize,
         );
       }
     }

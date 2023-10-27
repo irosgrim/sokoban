@@ -277,29 +277,80 @@ class GameMenu {
   draw() {
     //image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.drawImage(this.menuSprite, 0, 0, 40, 40, 40 * 10, 0, 40, 40);
-    this.ctx.drawImage(this.menuSprite, 40, 0, 40, 40, 40 * 12, 0, 40, 40);
+    // reload
+    this.ctx.drawImage(
+      this.menuSprite,
+      0,
+      0,
+      CONFIG.spriteSize,
+      CONFIG.spriteSize,
+      CONFIG.blockSize * 10,
+      0,
+      CONFIG.blockSize,
+      CONFIG.blockSize,
+    );
+    // previous level
+    this.ctx.drawImage(
+      this.menuSprite,
+      1 * CONFIG.spriteSize,
+      0,
+      CONFIG.spriteSize,
+      CONFIG.spriteSize,
+      CONFIG.blockSize * 12,
+      0,
+      CONFIG.blockSize,
+      CONFIG.blockSize,
+    );
 
-    this.ctx.drawImage(this.menuSprite, 80, 0, 40, 40, 40 * 14, 0, 40, 40);
-    this.ctx.drawImage(this.menuSprite, 120, 0, 40, 40, 40 * 15, 0, 40, 40);
+    // next level
+    this.ctx.drawImage(
+      this.menuSprite,
+      2 * CONFIG.spriteSize,
+      0,
+      CONFIG.spriteSize,
+      CONFIG.spriteSize,
+      CONFIG.blockSize * 14,
+      0,
+      CONFIG.blockSize,
+      CONFIG.blockSize,
+    );
+    // edit/create level
+    this.ctx.drawImage(
+      this.menuSprite,
+      3 * CONFIG.spriteSize,
+      0,
+      CONFIG.spriteSize,
+      CONFIG.spriteSize,
+      CONFIG.blockSize * 15,
+      0,
+      CONFIG.blockSize,
+      CONFIG.blockSize,
+    );
 
     // help icon
     // this.ctx.drawImage(this.menuSprite, 240, 0, 40, 40, 40 * 15, 0, 40, 40);
 
-    this.ctx.font = "14px PressStart2P-Regular";
+    this.ctx.font = `${14 * CONFIG.scale}px PressStart2P-Regular`;
     this.ctx.fillStyle = "white";
-    this.ctx.fillText(`Targets: ${this.targetsLeft} `, 10, 28);
-    this.ctx.fillText(`Distance: ${this.distanceWalked}`, 170, 28);
+    this.ctx.fillText(
+      `Targets: ${this.targetsLeft} `,
+      10 * CONFIG.scale,
+      28 * CONFIG.scale,
+    );
+    this.ctx.fillText(
+      `Distance: ${this.distanceWalked}`,
+      170 * CONFIG.scale,
+      28 * CONFIG.scale,
+    );
 
     this.ctx.fillText(
       `${this.currLevel < 10 ? "0" + this.currLevel : this.currLevel}`,
-      528,
-      28,
+      528 * CONFIG.scale,
+      28 * CONFIG.scale,
     );
   }
 
   getPosition(e, canvasEl) {
-    const { scale, blockSize } = CONFIG;
     const rect = canvasEl.getBoundingClientRect();
     let x, y;
 
@@ -314,11 +365,9 @@ class GameMenu {
     x *= canvasEl.width / rect.width;
     y *= canvasEl.height / rect.height;
 
-    // scale the blockSize to match the scaled canvas
-    const scaledBlockSize = (blockSize * scale) / 2;
-
-    const col = Math.floor(x / scaledBlockSize);
-    const row = Math.floor(y / scaledBlockSize);
+    // Use the blockSize directly to determine column and row
+    const col = Math.floor(x / CONFIG.blockSize);
+    const row = Math.floor(y / CONFIG.blockSize);
 
     return [col, row];
   }

@@ -4,13 +4,24 @@ sprite.src = "./assets/sprite.png";
 const menuSprite = new Image();
 menuSprite.src = "./assets/menu.png";
 
-const eventManager = new EventManager();
+let eventManager = new EventManager();
 
-const setupCanvas = (canvasId, rows, columns, blockSize, scale) => {
+const setupCanvas = (
+  canvasId,
+  rows,
+  columns,
+  blockSize,
+  scale,
+  isMenu = false,
+) => {
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
   canvas.width = Math.floor((columns * blockSize * scale) / 2);
   canvas.height = Math.floor((rows * blockSize * scale) / 2);
+  if (isMenu) {
+    canvas.width = Math.floor((columns * blockSize * scale) / 2);
+    canvas.height = Math.floor((blockSize * scale) / 2);
+  }
   return { canvas, ctx };
 };
 
@@ -22,9 +33,8 @@ const runEditor = (customLevel, gameCanvas, gameCanvasCtx, sprite) => {
     columns,
     blockSize,
     scale,
+    true,
   );
-  spriteCanvas.width = Math.floor((columns * blockSize * scale) / 2);
-  spriteCanvas.height = Math.floor((blockSize * scale) / 2);
 
   const menu = new EditorMenu(sprite, spriteCanvas, spriteCanvasCtx, CONFIG);
   menu.draw();
@@ -44,33 +54,47 @@ const runEditor = (customLevel, gameCanvas, gameCanvasCtx, sprite) => {
 };
 
 const runGame = async (customLevel, canvas, ctx, eventManager, sprite) => {
-  const { rows, columns, blockSize } = CONFIG;
+  const { rows, columns, blockSize, scale } = CONFIG;
   let level = null;
+
   if (customLevel) {
     level = JSON.parse(atob(customLevel));
-    console.log(JSON.stringify(level));
   } else {
     const req = await fetch("./map1.json");
-    level = await req.json();
+
+    if (req.ok) {
+      level = await req.json();
+    } else {
+      console.log("Failed to load level", req.status, req.statusText);
+      return;
+    }
   }
 
-  const setScore = (t) => {
-    document.getElementById("targets").innerHTML = t;
-  };
+  if (level === null) {
+    console.log("Level is null");
+    return;
+  }
 
-  eventManager.listen("targets", setScore);
   new InputHandler(eventManager);
-  const game = new Game(
-    level,
+
+  const { canvas: gameMenuCanvas, ctx: gameMenuCanvasCtx } = setupCanvas(
+    "sprite",
     rows,
     columns,
     blockSize,
-    canvas,
-    ctx,
-    eventManager,
-    sprite,
+    scale,
+    true,
   );
-  game.draw(ctx);
+  new GameMenu(
+    rows,
+    columns,
+    blockSize,
+    gameMenuCanvas,
+    gameMenuCanvasCtx,
+    eventManager,
+    menuSprite,
+  );
+  new Game(level, rows, columns, blockSize, canvas, ctx, eventManager, sprite);
 };
 
 const saveLevel = (levelData) => {
@@ -86,27 +110,17 @@ const saveLevel = (levelData) => {
   window.location.href = newUrl;
 };
 
+const { blockSize, rows, columns, scale } = CONFIG;
+const { canvas, ctx } = setupCanvas("canvas", rows, columns, blockSize, scale);
+
 const loadGame = async () => {
-  const { blockSize, rows, columns, scale } = CONFIG;
   const params = new URLSearchParams(window.location.search);
   const editor = params.get("editor");
   const customLevel = params.get("level");
 
-  const { canvas, ctx } = setupCanvas(
-    "canvas",
-    rows,
-    columns,
-    blockSize,
-    scale,
-  );
-
   if (!editor) {
-    const editorMenuCanvas = document.getElementById("sprite");
-    editorMenuCanvas.style.display = "none";
     runGame(customLevel, canvas, ctx, eventManager, sprite);
   } else {
-    const status = document.getElementById("status");
-    status.style.display = "none";
     runEditor(customLevel, canvas, ctx, sprite);
     eventManager.listen("editor:save", saveLevel);
   }

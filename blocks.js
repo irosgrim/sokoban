@@ -18,15 +18,6 @@ class Block {
     this.direction = null;
     if (this.props.type === "player") {
       this.direction = "DOWN";
-      this.eventManager.listen("player:move", (data) => {
-        const [x, y] = data.direction;
-        if (x > 0) this.direction = "RIGHT";
-        if (x < 0) this.direction = "LEFT";
-
-        if (y > 0) this.direction = "DOWN";
-        if (y < 0) this.direction = "UP";
-        if (x === 0 && y === 0) this.direction = "DOWN";
-      });
     }
   }
 
@@ -106,7 +97,11 @@ class MovableBlock extends Block {
   constructor(eventManager, block, sprite) {
     super(eventManager, block, sprite);
     this.eventManager = eventManager;
-    this.eventManager.listen("player:move", this.move.bind(this));
+    this.listenerAdded = false;
+    if (!this.listenerAdded && this.props.type === "player") {
+      this.eventManager.listen("player:move", this.move.bind(this));
+      this.listenerAdded = true;
+    }
   }
 
   hittingBlocksAtIndex(direction, blocks) {
@@ -137,7 +132,6 @@ class MovableBlock extends Block {
         }
       }
     }
-
     return hitting;
   }
 
@@ -191,9 +185,16 @@ class MovableBlock extends Block {
   }
 
   move(data) {
+    const [x, y] = data.direction;
+    if (x > 0) this.direction = "RIGHT";
+    if (x < 0) this.direction = "LEFT";
+
+    if (y > 0) this.direction = "DOWN";
+    if (y < 0) this.direction = "UP";
+    if (x === 0 && y === 0) this.direction = "DOWN";
+
     const hit = this.hittingBlocksAtIndex(data.direction, data.blocks);
     if (this.props.type === "player") {
-      const [x, y] = data.direction;
       let canMove = true;
 
       if (hit.length > 0) {
@@ -209,9 +210,20 @@ class MovableBlock extends Block {
       }
 
       if (canMove) {
-        this.x += x * this.width;
-        this.y += y * this.height;
-        // this.eventManager.broadcast("player:moved", { block: this, direction: data.direction });
+        const canvasWidth = data.canvasWidth;
+        const canvasHeight = data.canvasHeight;
+
+        let newX = this.x + x * this.width;
+        let newY = this.y + y * this.height;
+
+        if ((this.x > 0 || x > 0) && newX < canvasWidth && newX >= 0) {
+          this.x = newX;
+        }
+        if ((this.y > 0 || y > 0) && newY < canvasHeight && newY >= 0) {
+          this.y = newY;
+        }
+
+        this.eventManager.broadcast("player:step", 1);
       }
     }
   }

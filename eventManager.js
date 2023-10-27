@@ -32,27 +32,36 @@ class EventManager extends EventTarget {
 
   listen(topic, callback) {
     const wrappedCallback = (event) => callback(event.detail);
+    wrappedCallback.originalCallback = callback; // Store the original callback
 
     if (!this.listeners[topic]) {
       this.listeners[topic] = [];
     }
-    this.listeners[topic].push(wrappedCallback);
 
+    this.listeners[topic].push(wrappedCallback);
     this.addEventListener(topic, wrappedCallback);
-    // needed to be able to remove the listener
+
     return wrappedCallback;
   }
 
-  remove(topic, wrappedCallback) {
-    this.removeEventListener(topic, wrappedCallback);
-  }
-
-  removeAll() {
-    for (const [topic, callbacks] of Object.entries(this.listeners)) {
-      for (const wrappedCallback of callbacks) {
+  remove(topic, originalCallback) {
+    const wrappedCallbacks = this.listeners[topic] || [];
+    for (let i = 0; i < wrappedCallbacks.length; i++) {
+      const wrappedCallback = wrappedCallbacks[i];
+      // Assuming wrappedCallback was storing the original callback as a property
+      if (wrappedCallback.originalCallback === originalCallback) {
         this.removeEventListener(topic, wrappedCallback);
+        this.listeners[topic].splice(i, 1);
+        break;
       }
     }
-    this.listeners = {};
+  }
+
+  removeAll(topic) {
+    const wrappedCallbacks = this.listeners[topic] || [];
+    for (const wrappedCallback of wrappedCallbacks) {
+      this.removeEventListener(topic, wrappedCallback);
+    }
+    this.listeners[topic] = [];
   }
 }

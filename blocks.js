@@ -28,7 +28,7 @@ class Block {
       sx = CONFIG.spriteSize * PLAYER_SPRITE.get(this.direction);
     }
     if (this.props.type === "crate" && this.isOnTarget) {
-      sy = this.height;
+      sy = CONFIG.spriteSize;
     }
     context.drawImage(
       this.sprite,
@@ -38,8 +38,8 @@ class Block {
       CONFIG.spriteSize,
       this.x,
       this.y,
-      this.width,
-      this.height,
+      CONFIG.blockSize,
+      CONFIG.blockSize,
     );
   }
 

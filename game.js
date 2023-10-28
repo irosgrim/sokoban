@@ -329,8 +329,9 @@ class GameMenu {
 
     // help icon
     // this.ctx.drawImage(this.menuSprite, 240, 0, 40, 40, 40 * 15, 0, 40, 40);
-
-    this.ctx.font = `${14 * CONFIG.scale}px PressStart2P-Regular`;
+    let baseFontSize = 14; 
+    let adjustedFontSize = baseFontSize * CONFIG.scale;
+    this.ctx.font = `${adjustedFontSize}px PressStart2P-Regular`;
     this.ctx.fillStyle = "white";
     this.ctx.fillText(
       `Targets: ${this.targetsLeft} `,

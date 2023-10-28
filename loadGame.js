@@ -30,11 +30,11 @@ const setupCanvas = (
 ) => {
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
-  canvas.width = Math.floor((columns * blockSize * scale) / 2);
-  canvas.height = Math.floor((rows * blockSize * scale) / 2);
+  canvas.width = Math.floor(columns * blockSize);
+  canvas.height = Math.floor(rows * blockSize);
   if (isMenu) {
-    canvas.width = Math.floor((columns * blockSize * scale) / 2);
-    canvas.height = Math.floor((blockSize * scale) / 2);
+    canvas.width = Math.floor(columns * blockSize);
+    canvas.height = Math.floor(blockSize);
   }
   return { canvas, ctx };
 };

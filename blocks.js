@@ -22,10 +22,10 @@ class Block {
   }
 
   spriteToBlock(context) {
-    let sx = this.width * this.props.bg;
+    let sx = CONFIG.spriteSize * this.props.bg;
     let sy = 0;
     if (this.props.type === "player") {
-      sx = this.width * PLAYER_SPRITE.get(this.direction);
+      sx = CONFIG.spriteSize * PLAYER_SPRITE.get(this.direction);
     }
     if (this.props.type === "crate" && this.isOnTarget) {
       sy = this.height;
@@ -34,8 +34,8 @@ class Block {
       this.sprite,
       sx,
       sy,
-      this.width,
-      this.height,
+      CONFIG.spriteSize,
+      CONFIG.spriteSize,
       this.x,
       this.y,
       this.width,

@@ -3,7 +3,7 @@ const cfg = () => {
   const columns = 16;
   const scale = window.devicePixelRatio;
   const blockSize = 40 * scale;
-  const spriteSize = 80;
+  const spriteSize = 120;
 
   return {
     blockSize,
